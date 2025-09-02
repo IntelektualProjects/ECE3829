@@ -23,7 +23,7 @@
 module tb_top;
 
 reg [7:0] sw;
-reg clk;
+reg clk = 0;
 reg btnL, btnR;
 wire [3:0] an;
 wire [6:0] seg;
@@ -32,7 +32,7 @@ wire [15:0] led;
 
 always #5 clk = ~clk;
 
-FSMTrial(
+FSMTrial u1 (
     .sw(sw),
     .clk(clk),
     .btnL(btnL),
@@ -45,23 +45,22 @@ FSMTrial(
     initial begin
         sw = 0;
         btnL = 1;
-        #2;
+        #200;
         btnL = 0;
-        #10;
+        #1000;
         sw = 9;
-        #10;
         btnR = 1; // setval?
-        #2;
+        #400;
         btnR = 0;
-        #10;
+        #1000;
         btnR = 1; // disp
-        #2;
+        #200;
         btnR = 0;
-        #10;
+        #1000;
         btnR = 1; // countdown
-        #2;
+        #200;
         btnR = 0;
-        #10;
+        #1000;
 
     end
 

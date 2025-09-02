@@ -3,15 +3,14 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 08/27/2025 01:23:26 PM
+// Create Date: 09/02/2025 02:51:48 PM
 // Design Name: 
 // Module Name: Two_bit_counter
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// Purpose of 2 bit counter is to generate control signal
-// to the MUX and the decoder output
+// 
 // Dependencies: 
 // 
 // Revision:

@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 08/27/2025 12:58:05 PM
+// Create Date: 09/02/2025 02:49:54 PM
 // Design Name: 
 // Module Name: add3
 // Project Name: 
@@ -40,5 +40,4 @@ module add3(
             default: out = 4'b0000;
         endcase
     end
-    
 endmodule
