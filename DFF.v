@@ -22,13 +22,11 @@
 
 module DFF(
     input clk,
-    input clk_en,
     input D,
     output reg Q = 0
     );
     always @ (posedge clk) begin
-      if(clk_en == 1) 
-           Q <= D;
+        Q <= D;
     end
     
 endmodule

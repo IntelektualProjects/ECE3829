@@ -60,11 +60,16 @@ module FSMTrial(
     // Functional Blocks to Design
     DisplayTop a0 (clk, display_value, display_enable, an, seg);
     DownCounter a1 (.clk(clk), .enable(countdown_enable), .load(load_enable), .starting_value(user_input_value), .out(count_out));
-    //ledBlink a2 (.clk(clk), .enable(current_state == COUNT), .led(led));
+    
+    //debouncers
+    wire btnL_d;
+    wire btnR_d;
+    Debouncer d0 (clk, btnL, btnL_d);
+    Debouncer d1 (clk, btnR, btnR_d);
     
     // Sequential State Logic for Moore Machine
     always @ (posedge clk) begin
-        if (btnL) begin
+        if (btnL_d) begin
             current_state <= INIT;
         end else begin
             current_state <= next_state;
@@ -76,20 +81,20 @@ module FSMTrial(
     always @(*) begin
         case (current_state)
             INIT: begin  // Initialization
-                    if(btnL)
+                    if(btnL_d)
                         next_state = SETVAL;
                     end
             SETVAL:begin  // User input value
-                    if(btnR) begin
+                    if(btnR_d) begin
                         next_state = DISP;
                     end
                   end
             DISP:begin  // User value displayed on 7 Seg
-                    if(btnR)
+                    if(btnR_d)
                         next_state = COUNT;
                   end
             COUNT: begin // Countdown to Led flashing (pause function too)
-                    if(count_out == 8'b0 && btnR == 1) 
+                    if(count_out == 8'b0 && btnR_d == 1) 
                         next_state = DISP;
                     else
                         next_state = COUNT;

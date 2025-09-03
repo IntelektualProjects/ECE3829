@@ -22,13 +22,19 @@
 
 module DebounceCLK(
     input clkin,
-    output clk_en
+    output reg clkout
     );
     
     reg [26:0]counter=0;
-    always @(posedge clkin)
-    begin
-       counter <= (counter >= 249999)? 0: counter+1;
+    
+    always @(posedge clkin) begin
+        // have to toggle every 100M since 1 input cycle equates to two output cycles
+        if(counter == 25_000_000 - 1) begin
+            counter <= 0;
+            clkout <= ~clkout;
+        end else
+            counter <= counter + 1;
+         
     end
-    assign clk_en = (counter == 249999) ? 1'b1:1'b0;
+    
 endmodule
