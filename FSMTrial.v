@@ -35,15 +35,15 @@ module FSMTrial(
     // 01 -> Set Value state
     // 10 -> Display value on 7 Seg
     // 11 -> Count Down on Display + LED Flash
-    parameter INIT = 2'b00;
-    parameter SETVAL = 2'b01;
-    parameter DISP = 2'b10;
-    parameter COUNT = 2'b11;
+    parameter INIT = 3'b000;
+    parameter SETVAL = 3'b001;
+    parameter DISP = 3'b010;
+    parameter COUNT = 3'b011;
     parameter DONE = 3'b100;
     
     // state variables
-    reg [1:0] current_state;
-    reg [1:0] next_state;
+    reg [2:0] current_state;
+    reg [2:0] next_state;
     
     // Enables and User variables
     reg [7:0] user_input_value;
@@ -61,7 +61,7 @@ module FSMTrial(
     // Functional Blocks to Design
     DisplayTop a0 (clk, display_value, display_enable, an, seg);
     DownCounter a1 (.clk(clk), .enable(countdown_enable), .load(load_enable), .starting_value(user_input_value), .out(count_out));
-    //ledBlink a2 (.clk(clk), .enable(current_state == COUNT), .led(led));
+    //ledBlink a2 (.clk(clk), .enable(current_state == DONE), .led(led));
     
     //Debouncers for the buttons
 //    wire btnL_d;
@@ -97,12 +97,12 @@ module FSMTrial(
                   end
             COUNT: begin // Countdown to Led flashing (pause function too)
                     if(count_out == 8'b0 && btnR == 1) 
-                        next_state = DISP;
+                        next_state = DONE;
                    end
-//            DONE: begin
-//                    if(btnR_d)
-//                        next_state = DISP;
-//                end
+            DONE: begin
+                    if(btnR)
+                        next_state = DISP;
+                end
             default: next_state = INIT;
         endcase
     end
@@ -139,7 +139,10 @@ module FSMTrial(
                     if (btnR == 1 && count_out != 0) begin
                         countdown_enable = ~countdown_enable;
                         end
-                    end   
+                    end
+            DONE: begin
+                led = 16'b1111111111111111;
+            end
         endcase
     end
 

@@ -28,12 +28,10 @@ module ledBlink(
     wire clk_slow;
     CountdownCLK L0 (clk, clk_slow);
     
-    always @(clk_slow, enable) begin
-    if(enable) begin
-        if(clk_slow == 1)
+    always @(posedge clk_slow) begin
+        if(enable)
             led <= 16'b1111111111111111;
         else
             led <= 16'b0;
-     end
     end
 endmodule
