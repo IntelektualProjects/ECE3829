@@ -39,7 +39,6 @@ module FSMTrial(
     parameter SETVAL = 2'b01;
     parameter DISP = 2'b10;
     parameter COUNT = 2'b11;
-    parameter DONE = 3'b100;
     
     // state variables
     reg [1:0] current_state;
@@ -62,12 +61,6 @@ module FSMTrial(
     DisplayTop a0 (clk, display_value, display_enable, an, seg);
     DownCounter a1 (.clk(clk), .enable(countdown_enable), .load(load_enable), .starting_value(user_input_value), .out(count_out));
     //ledBlink a2 (.clk(clk), .enable(current_state == COUNT), .led(led));
-    
-    //Debouncers for the buttons
-//    wire btnL_d;
-//    wire btnR_d;
-//    Debouncer d0 (clk, btnL, btnL_d);
-//    Debouncer d1 (clk, btnR, btnR_d);
     
     // Sequential State Logic for Moore Machine
     always @ (posedge clk) begin
@@ -99,10 +92,6 @@ module FSMTrial(
                     if(count_out == 8'b0 && btnR == 1) 
                         next_state = DISP;
                    end
-//            DONE: begin
-//                    if(btnR_d)
-//                        next_state = DISP;
-//                end
             default: next_state = INIT;
         endcase
     end
@@ -142,6 +131,16 @@ module FSMTrial(
                     end   
         endcase
     end
+    
+    // wire clk_out;
+    // CountdownCLK c1 (clk, clk_out);
+    
+//   always @(posedge clk_slow) begin
+//        if((count_out == 0) && (current_state == COUNT))
+//            led <= 16'b1111111111111111;
+//        else
+//            led <= 16'b0;
+//    end
 
     
 endmodule
