@@ -31,7 +31,6 @@ module DownCounter(
     wire clk_slowed;
     
     CountdownCLK c0 (clk, clk_slowed);
-    
     always @(posedge clk_slowed) begin
         // pause feature from enable pin on/off
         // enable = high, out counts down

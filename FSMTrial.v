@@ -27,7 +27,7 @@ module FSMTrial(
     input btnR,
     output [3:0] an,
     output [6:0] seg,
-    output [15:0] led
+    output reg [15:0] led
     );
     
     // state encoding system
@@ -61,17 +61,17 @@ module FSMTrial(
     // Functional Blocks to Design
     DisplayTop a0 (clk, display_value, display_enable, an, seg);
     DownCounter a1 (.clk(clk), .enable(countdown_enable), .load(load_enable), .starting_value(user_input_value), .out(count_out));
-    ledBlink(.clk(clk), .enable(current_state == COUNT), .led(led));
+    //ledBlink a2 (.clk(clk), .enable(current_state == COUNT), .led(led));
     
     //Debouncers for the buttons
-    wire btnL_d;
-    wire btnR_d;
-    Debouncer d0 (clk, btnL, btnL_d);
-    Debouncer d1 (clk, btnR, btnR_d);
+//    wire btnL_d;
+//    wire btnR_d;
+//    Debouncer d0 (clk, btnL, btnL_d);
+//    Debouncer d1 (clk, btnR, btnR_d);
     
     // Sequential State Logic for Moore Machine
     always @ (posedge clk) begin
-        if (btnL_d) begin
+        if (btnL) begin
             current_state <= INIT;
         end else begin
             current_state <= next_state;
@@ -83,20 +83,20 @@ module FSMTrial(
     always @(*) begin
         case (current_state)
             INIT: begin  // Initialization
-                    if(btnL_d)
+                    if(btnL)
                         next_state = SETVAL;
                     end
             SETVAL:begin  // User input value
-                    if(btnR_d) begin
+                    if(btnR) begin
                         next_state = DISP;
                     end
                   end
             DISP:begin  // User value displayed on 7 Seg
-                    if(btnR_d)
+                    if(btnR)
                         next_state = COUNT;
                   end
             COUNT: begin // Countdown to Led flashing (pause function too)
-                    if(count_out == 8'b0 && btnR_d == 1) 
+                    if(count_out == 8'b0 && btnR == 1) 
                         next_state = DISP;
                    end
 //            DONE: begin
@@ -115,6 +115,7 @@ module FSMTrial(
                  display_enable = 0;
                  countdown_enable = 0;
                  load_enable = 0;
+                 led = 16'b0000000000000001;
                  end
             SETVAL:begin  // User input value
                     // take in switch value before moving to next state
@@ -122,23 +123,23 @@ module FSMTrial(
                     display_enable = 0;
                     countdown_enable = 0;
                     load_enable = 0;
+                    led = 16'b0000000000000010;
                   end
             DISP:begin  // User value displayed on 7 Seg
                     load_enable = 1;  
                     display_enable = 1;
                     countdown_enable = 0;
+                    led = 16'b0000000000000100;
                   end
             COUNT: begin // Countdown to Led flashing (pause function too)
                     load_enable = 0;
                     display_enable = 1;
                     countdown_enable = 1;
-                    if (btnR_d == 1 && count_out != 0) begin
+                    led = 16'b0000000000001000;
+                    if (btnR == 1 && count_out != 0) begin
                         countdown_enable = ~countdown_enable;
-                    end
-                  end
-//            DONE: begin
-//                led_enable = 1;
-//            end   
+                        end
+                    end   
         endcase
     end
 
