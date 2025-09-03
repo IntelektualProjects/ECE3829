@@ -91,6 +91,8 @@ module FSMTrial(
             COUNT: begin // Countdown to Led flashing (pause function too)
                     if(count_out == 8'b0 && btnR == 1) 
                         next_state = DISP;
+                    else
+                        next_state = COUNT;
                    end
             default: next_state = INIT;
         endcase
@@ -104,7 +106,7 @@ module FSMTrial(
                  display_enable = 0;
                  countdown_enable = 0;
                  load_enable = 0;
-                 led = 16'b0000000000000001;
+//                 led = 16'b0000000000000001;
                  end
             SETVAL:begin  // User input value
                     // take in switch value before moving to next state
@@ -112,19 +114,19 @@ module FSMTrial(
                     display_enable = 0;
                     countdown_enable = 0;
                     load_enable = 0;
-                    led = 16'b0000000000000010;
+//                    led = 16'b0000000000000010;
                   end
             DISP:begin  // User value displayed on 7 Seg
                     load_enable = 1;  
                     display_enable = 1;
                     countdown_enable = 0;
-                    led = 16'b0000000000000100;
+//                    led = 16'b0000000000000100;
                   end
             COUNT: begin // Countdown to Led flashing (pause function too)
                     load_enable = 0;
                     display_enable = 1;
                     countdown_enable = 1;
-                    led = 16'b0000000000001000;
+//                    led = 16'b0000000000001000;
                     if (btnR == 1 && count_out != 0) begin
                         countdown_enable = ~countdown_enable;
                         end
@@ -132,15 +134,23 @@ module FSMTrial(
         endcase
     end
     
-    // wire clk_out;
-    // CountdownCLK c1 (clk, clk_out);
+     wire clk_out;
+     CountdownCLK c1 (clk, clk_out);
+     
+     reg one_counter;
+     
+     always@(posedge clk_out)
+        one_counter <= one_counter + 1;
     
-//   always @(posedge clk_slow) begin
-//        if((count_out == 0) && (current_state == COUNT))
-//            led <= 16'b1111111111111111;
-//        else
-//            led <= 16'b0;
-//    end
+    always @(posedge clk) begin
+        if((count_out == 0) && (current_state == COUNT))
+            if (one_counter == 1)
+                led <= 16'b1111111111111111;
+            else
+                led <= 16'd0;
+        else
+            led <= 16'd0;
+    end
 
     
 endmodule
