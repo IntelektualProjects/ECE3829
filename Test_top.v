@@ -34,14 +34,15 @@ module Test_top(
     // 01 -> Set Value state
     // 10 -> Display value on 7 Seg
     // 11 -> Count Down on Display + LED Flash
-    parameter INIT = 2'b00;
-    parameter SETVAL = 2'b01;
-    parameter DISP = 2'b10;
-    parameter COUNT = 2'b11;
+    parameter INIT = 3'b00;
+    parameter SETVAL = 3'b01;
+    parameter DISP = 3'b10;
+    parameter COUNT = 3'b11;
+    parameter PAUSE = 3'b100;
     
     // state variables
-    reg [1:0] current_state;
-    reg [1:0] next_state;
+    reg [2:0] current_state;
+    reg [2:0] next_state;
     
     // Enables and User variables
     reg [7:0] user_input_value;
@@ -58,19 +59,19 @@ module Test_top(
     // Output Variables and modules for each state
     wire [7:0] count_out;
     wire [7:0] display_value;
-    assign display_value = (current_state == COUNT) ? count_out : user_input_value;
+    assign display_value = (current_state == COUNT || current_state == PAUSE) ? count_out : user_input_value;
     
     // Functional Blocks to Design
     DisplayTop a0 (clk, display_value, display_enable, an, seg);
     DownCounter a1 (.clk(clk), .enable(countdown_enable), .load(load_enable), .starting_value(user_input_value), .out(count_out));
     // Sequential State Logic for Moore Machine
     always @ (posedge clk) begin
-        if (btnL) begin //button press
+        if (btnL) begin
             current_state <= INIT; //initialize
             user_input_value <= 8'b0;
         end 
         else begin
-            current_state <= next_state; //next state
+            current_state <= next_state;
         end
         
         if(current_state == SETVAL && next_state == DISP) begin
@@ -78,16 +79,16 @@ module Test_top(
         end
     end
     
-    // Pause Logic
-    reg paused;
-    always @(posedge clk) begin
-        if (btnL) begin
-            paused <= 0;
-        end
-        else if (current_state == COUNT && btnR == 1) begin
-            paused <= ~paused; // Toggle pause on button press
-        end
-    end
+//    // Pause Logic
+//    reg paused;
+//    always @(posedge clk) begin
+//        if (btnL) begin
+//            paused <= 0;
+//        end
+//        else if (current_state == COUNT && btnR == 1) begin
+//            paused <= ~paused; // Toggle pause on button press
+//        end
+//    end
     
     // Next-State Logic Combinational Block
     always @(*) begin
@@ -113,9 +114,17 @@ module Test_top(
             COUNT: begin // Countdown to Led flashing (pause function too)
                     if(count_out == 8'b0 && btnR == 1) 
                         next_state = DISP;
+                    else if (count_out != 0 && btnR == 1)
+                        next_state = PAUSE;
                     else
-                        next_state = COUNT;
+                        next_state = COUNT; 
                    end
+            PAUSE: begin
+                if (btnR)
+                    next_state = COUNT;
+                else
+                    next_state = PAUSE;
+                end
             default: next_state = INIT;
         endcase
     end
@@ -147,11 +156,17 @@ module Test_top(
                     display_enable = 1;
                     countdown_enable = 1;
 //                    led = 16'b1000;
-                    countdown_enable = !paused;
-                    end   
+                    end
+            PAUSE: begin
+                    load_enable = 0;
+                    display_enable = 1;
+                    countdown_enable = 0;
+            end 
         endcase
     end
-    
+
+
+// 1 Hz LED Pulse at completion of down counter
      reg one_counter;
      wire slow_clk;
      CountdownCLK c0 (clk, slow_clk);
